@@ -1,3 +1,4 @@
+require 'securerandom'
 require_relative '../value_objects/fruit_size'
 require_relative '../value_objects/ripeness_level'
 
@@ -9,9 +10,13 @@ module Domain
       def initialize(type:, size:, ripeness:, weight: nil)
         @id = SecureRandom.uuid
         @type = type # :orange, :lemon, :grapefruit
+        
+        # Convert to value objects FIRST before using their methods
         @size = size.is_a?(ValueObjects::FruitSize) ? size : ValueObjects::FruitSize.new(size)
         @ripeness = ripeness.is_a?(ValueObjects::RipenessLevel) ? ripeness : ValueObjects::RipenessLevel.new(ripeness)
-        @weight = weight || rand(size.weight_range)
+        
+        # Now we can safely access weight_range
+        @weight = weight || rand(@size.weight_range)
       end
 
       def potential_juice_volume(efficiency_factor = 0.9)
