@@ -30,7 +30,8 @@ module Domain
       end
 
       def percentage_full
-        ((current_volume.milliliters / capacity.milliliters) * 100).round(2)
+        return 0.0 if capacity.milliliters == 0
+        ((current_volume.milliliters.to_f / capacity.milliliters) * 100).round(2)
       end
     end
   end
