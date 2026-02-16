@@ -1,6 +1,13 @@
+# Application Layer Entry Point
+
+require_relative 'domain'
+
 require_relative 'application/use_cases/start_juicing'
 require_relative 'application/use_cases/stop_juicing'
 require_relative 'application/use_cases/clean_machine'
 require_relative 'application/use_cases/feed_fruit'
 require_relative 'application/use_cases/get_metrics'
 require_relative 'application/use_cases/get_status'
+
+module Application
+end
