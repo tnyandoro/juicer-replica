@@ -8,7 +8,3 @@ require_relative 'domain/entities/press_unit'
 require_relative 'domain/entities/filter_unit'
 require_relative 'domain/juicer_machine'
 
-module CommercialJuicer
-  module Domain
-  end
-end

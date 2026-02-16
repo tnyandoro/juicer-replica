@@ -62,5 +62,28 @@ RSpec.describe Domain::Entities::Fruit do
       
       expect(waste).to be_within(0.1).of(150 - juice.milliliters)
     end
+
+    # spec/domain/entities/fruit_spec.rb
+
+    it 'documents density assumption in waste calculation' do
+    fruit = described_class.new(type: :orange, size: :medium, ripeness: :ripe, weight: 150)
+    
+    # Waste calculation assumes 1.0 g/ml density
+    # This is documented in the source code
+    expect(fruit.class::JUICE_DENSITY).to eq(1.0)
+    end
+
+    it 'calculates waste with consistent units (grams)' do
+    fruit = described_class.new(type: :orange, size: :medium, ripeness: :ripe, weight: 150)
+    juice = fruit.potential_juice_volume(0.9)
+    waste = fruit.potential_waste(0.9)
+    
+    # Waste + juice weight should approximately equal original weight
+    # (allowing for rounding errors)
+    juice_weight = juice.milliliters * described_class::JUICE_DENSITY
+    total = waste + juice_weight
+    
+    expect(total).to be_within(0.5).of(fruit.weight)
+    end
   end
 end

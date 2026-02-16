@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'domain/entities/filter_unit'
+require 'domain/value_objects/juice_volume'
 
 RSpec.describe Domain::Entities::FilterUnit do
   describe '#initialize' do
@@ -46,6 +47,20 @@ RSpec.describe Domain::Entities::FilterUnit do
       volume = Domain::ValueObjects::JuiceVolume.new(100)
       
       expect { filter.filter(volume) }.to raise_error('Filter not idle')
+    end
+
+    it 'remains clogged after filter when threshold reached' do
+      filter = described_class.new
+      
+      # Filter 10 times to reach clog threshold (10 * 10 = 100)
+      10.times do
+        volume = Domain::ValueObjects::JuiceVolume.new(100)
+        filter.filter(volume)
+      end
+      
+      # Filter should be clogged, not idle
+      expect(filter.clogged?).to be true
+      expect(filter.idle?).to be false
     end
   end
 

@@ -17,12 +17,16 @@ module Domain
         
         @state = :pressing
         @last_press_time = Time.now
+        
         juice = fruit.potential_juice_volume(@efficiency_factor)
         waste = fruit.potential_waste(@efficiency_factor)
         @press_count += 1
-        @state = :idle
         
         { juice: juice, waste: waste }
+      ensure
+        # FIX: Always reset state to idle if still pressing
+        # This ensures state is cleaned up even if an exception occurs
+        @state = :idle if @state == :pressing
       end
 
       def idle? = state == :idle

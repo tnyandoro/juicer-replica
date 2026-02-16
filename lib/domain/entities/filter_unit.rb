@@ -1,4 +1,3 @@
-# lib/domain/entities/filter_unit.rb
 module Domain
   module Entities
     class FilterUnit
@@ -22,7 +21,9 @@ module Domain
         
         check_clog!
         
-        @state = :idle
+        # FIX: Only reset to idle if not clogged
+        @state = :idle unless clogged?
+        
         juice_volume # Returns filtered juice (same volume for now)
       end
 

@@ -46,6 +46,39 @@ RSpec.describe Domain::Entities::PressUnit do
       
       expect { press.press(fruit) }.to raise_error('Press unit not idle')
     end
+
+    it 'resets state to idle even if exception occurs during press' do
+    press = described_class.new
+    
+    # Create a fruit that will raise an exception
+    bad_fruit = double('fruit')
+    allow(bad_fruit).to receive(:potential_juice_volume).and_raise(StandardError.new('Calculation failed'))
+    allow(bad_fruit).to receive(:potential_waste).and_raise(StandardError.new('Calculation failed'))
+    
+    # Press should raise the exception
+    expect { press.press(bad_fruit) }.to raise_error(StandardError, 'Calculation failed')
+    
+    # But state should be reset to idle (not stuck at :pressing)
+    expect(press.idle?).to be true
+    expect(press.pressing?).to be false
+    end
+
+    it 'increments press count only on successful press' do
+    press = described_class.new
+    fruit = Domain::Entities::Fruit.new(type: :orange, size: :medium, ripeness: :ripe, weight: 150)
+    
+    # Successful press
+    press.press(fruit)
+    expect(press.press_count).to eq(1)
+    
+    # Failed press should not increment count
+    bad_fruit = double('fruit')
+    allow(bad_fruit).to receive(:potential_juice_volume).and_raise(StandardError.new('Failed'))
+    allow(bad_fruit).to receive(:potential_waste).and_raise(StandardError.new('Failed'))
+    
+    expect { press.press(bad_fruit) }.to raise_error(StandardError)
+    expect(press.press_count).to eq(1) # Still 1, not 2
+    end
   end
 
   describe '#trigger_error' do
