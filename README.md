@@ -67,3 +67,59 @@ ensure
   @state = :idle if @state == :pressing
 end
 ```
+
+## Input Validation & Domain Invariants
+
+**Problem:** Domain entities must protect their internal state from invalid inputs.
+
+**Solution:** Validate at the boundary (method entry point).
+
+**Code Pattern:**
+
+```ruby
+def add_waste(grams)
+  raise ArgumentError, "Grams must be positive" unless grams > 0
+  # ... rest of logic
+end
+```
+
+## Input Validation & Domain Invariants
+
+**Problem:** Domain entities must protect their internal state from invalid inputs.
+
+**Solution:** Validate at the boundary (method entry point).
+
+**Code Pattern:**
+
+```ruby
+def add_waste(grams)
+  raise ArgumentError, "Grams must be positive" unless grams > 0
+  # ... rest of logic
+end
+```
+
+## State Consistency & Transactional Operations
+
+**Problem:** Multi-step operations can leave the system in an inconsistent
+state if any step fails.
+
+**Solution:** Pre-validate all conditions BEFORE mutating state.
+
+**Code Pattern:**
+
+```ruby
+def feed_fruit(fruit)
+  # 1. Validate preconditions
+  raise "Machine not running" unless running?
+
+  # 2. Compute results (read-only)
+  result = @press_unit.press(fruit)
+
+  # 3. Pre-validate capacity (read-only checks)
+  raise "Tank would overflow" if @juice_tank.would_overflow?(result[:juice])
+
+  # 4. Mutate state (all validations passed)
+  @juice_tank.add_juice(result[:juice])
+  @waste_bin.add_waste(result[:waste])
+end
+```

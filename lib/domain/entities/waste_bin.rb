@@ -10,7 +10,10 @@ module Domain
       end
 
       def add_waste(grams)
+        # FIX: Validate that grams is positive
+        raise ArgumentError, "Grams must be positive" unless grams > 0
         raise ArgumentError, "Bin would overflow" if would_overflow?(grams)
+        
         @current_waste += grams
         @waste_count += 1
       end
@@ -28,6 +31,7 @@ module Domain
       end
 
       def percentage_full
+        return 0.0 if capacity == 0
         ((current_waste.to_f / capacity) * 100).round(2)
       end
     end

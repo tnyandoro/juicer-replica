@@ -35,6 +35,25 @@ RSpec.describe Domain::Entities::WasteBin do
       
       expect { bin.add_waste(30) }.to raise_error(ArgumentError, 'Bin would overflow')
     end
+
+    it 'raises error when grams is zero' do
+    bin = described_class.new
+    
+    expect { bin.add_waste(0) }.to raise_error(ArgumentError, "Grams must be positive")
+    end
+
+    it 'raises error when grams is negative' do
+    bin = described_class.new
+    
+    expect { bin.add_waste(-10) }.to raise_error(ArgumentError, "Grams must be positive")
+    end
+
+    it 'accepts positive grams' do
+    bin = described_class.new
+    
+    expect { bin.add_waste(100) }.not_to raise_error
+    expect(bin.current_waste).to eq(100)
+    end
   end
 
   describe '#empty!' do
