@@ -210,3 +210,43 @@ def feed_fruit(fruit)
   @waste_bin.add_waste(result[:waste])
 end
 ```
+
+## Project Structure
+
+commercial-juicer-ruby/
+├── bin/
+│ └── juicer_cli.rb # Interactive CLI
+├── lib/
+│ ├── domain/
+│ │ ├── entities/
+│ │ │ ├── fruit.rb # Fruit entity
+│ │ │ ├── juice_tank.rb # Juice storage
+│ │ │ ├── waste_bin.rb # Waste tracking
+│ │ │ ├── press_unit.rb # Squeezing logic
+│ │ │ └── filter_unit.rb # Filtering logic
+│ │ ├── value_objects/
+│ │ │ ├── fruit_size.rb # Size enum
+│ │ │ ├── ripeness_level.rb # Ripeness enum
+│ │ │ └── juice_volume.rb # Volume value object
+│ │ └── juicer_machine.rb # Main orchestrator
+│ ├── application/
+│ │ └── use_cases/
+│ │ ├── start_juicing.rb # Start use case
+│ │ ├── stop_juicing.rb # Stop use case
+│ │ ├── clean_machine.rb # Clean use case
+│ │ ├── feed_fruit.rb # Feed use case
+│ │ ├── get_metrics.rb # Metrics use case
+│ │ └── get_status.rb # Status use case
+│ ├── infrastructure/
+│ │ ├── logger.rb # Logging (optional)
+│ │ └── storage.rb # Persistence (optional)
+│ ├── domain.rb # Domain entry point
+│ └── application.rb # Application entry point
+├── spec/
+│ ├── domain/
+│ ├── application/
+│ ├── integration/
+│ └── spec_helper.rb
+├── Gemfile
+├── README.md
+└── .rspec
