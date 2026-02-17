@@ -215,6 +215,8 @@ end
 
 ## Project Structure
 
+```text
+
 commercial-juicer-ruby/
 ├── bin/
 │ └── juicer_cli.rb # Interactive CLI
@@ -252,3 +254,4 @@ commercial-juicer-ruby/
 ├── Gemfile
 ├── README.md
 └── .rspec
+```
