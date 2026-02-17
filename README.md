@@ -14,6 +14,8 @@ A production-grade simulation of a commercial citrus juicer (Zumex Versatile Bas
 
 ## Architecture
 
+`````text
+
 ┌──────────────────────────┐
 │ Interface Layer │ CLI / API / Web UI
 │ (bin/juicer_cli.rb) │
@@ -100,7 +102,7 @@ Simulation of a commercial citrus juicer (Zumex Versatile Basic) using Clean Lay
 
 ```bash
 bundle install
-````
+`````
 
 # juicer-replica
 

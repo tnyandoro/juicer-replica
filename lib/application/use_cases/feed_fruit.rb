@@ -32,7 +32,8 @@ module Application
           success: false,
           message: "Failed to process fruit: #{e.message}",
           juice: "0 ml",
-          waste: "0g"
+          waste: "0g",
+          metrics: @machine.metrics  # FIX: Include metrics for consistent response shape
         }
       end
     end

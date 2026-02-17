@@ -20,13 +20,26 @@ module Application
           metrics: status[:metrics],
           efficiency: calculate_efficiency(status[:metrics])
         }
+      rescue => e
+        {
+          success: false,
+          message: "Failed to get metrics: #{e.message}",
+          state: nil,
+          juice_tank: nil,
+          waste_bin: nil,
+          press_unit: nil,
+          filter_unit: nil,
+          metrics: @machine.metrics,
+          efficiency: 0.0
+        }
       end
 
       private
 
       def calculate_efficiency(metrics)
         return 0.0 if metrics[:fruits_processed] == 0
-        juice_per_fruit = metrics[:total_juice_ml] / metrics[:fruits_processed]
+        
+        juice_per_fruit = metrics[:total_juice_ml].to_f / metrics[:fruits_processed]
         expected_yield = 50.0
         ((juice_per_fruit / expected_yield) * 100).round(2)
       end
