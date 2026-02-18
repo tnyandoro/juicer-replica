@@ -24,7 +24,7 @@ module Domain
         
         { juice: juice, waste: waste }
       ensure
-        # FIX: Always reset state to idle if still pressing
+        #  Always reset state to idle if still pressing
         # This ensures state is cleaned up even if an exception occurs
         @state = :idle if @state == :pressing
       end

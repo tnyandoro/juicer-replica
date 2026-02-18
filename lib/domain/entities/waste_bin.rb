@@ -10,7 +10,7 @@ module Domain
       end
 
       def add_waste(grams)
-        # FIX: Validate that grams is positive
+        #  Validate that grams is positive
         raise ArgumentError, "Grams must be positive" unless grams > 0
         raise ArgumentError, "Bin would overflow" if would_overflow?(grams)
         
