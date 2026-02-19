@@ -1,4 +1,3 @@
-# spec/domain/entities/fruit_spec.rb
 require 'spec_helper'
 require 'domain/entities/fruit'
 
@@ -33,11 +32,11 @@ RSpec.describe Domain::Entities::Fruit do
 
   describe '#potential_juice_volume' do
     it 'calculates juice based on weight, ripeness, and size' do
-      # weight: 150g, ripeness: 0.8, juice_factor: 0.5, fruit_type: 0.5, density: 1.04
-      # 150 * 0.5 * 0.8 * 0.5 / 1.04 = 57.69 ml
+      # weight: 150g, ripeness: 0.8, size_factor: 0.5, fruit_type: 0.5, density: 1.04
+      # 150 * 0.5 * 0.8 * 0.5 / 1.04 = 28.85 ml
       fruit = described_class.new(type: :orange, size: :medium, ripeness: :ripe, weight: 150)
       juice = fruit.potential_juice_volume  # ✅ NO argument
-      expect(juice.milliliters).to be_within(1.0).of(57.69)
+      expect(juice.milliliters).to be_within(1.0).of(28.85)  # ✅ FIXED from 57.69
     end
 
     it 'returns less juice for unripe fruit' do
