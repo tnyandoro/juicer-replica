@@ -1,41 +1,102 @@
-# Ruby Commercial Citrus Juicer Simulator
+# 🍊 Ruby Commercial Citrus Juicer Simulator
 
-A production-grade simulation of a commercial citrus juicer (Zumex Versatile Basic) built with Ruby using Clean Layered Architecture and Domain-Driven Design.
+> A production-grade simulation of a commercial citrus juicer (Zumex Versatile Basic) built with Ruby using Clean Layered Architecture, Domain-Driven Design, and Prometheus observability.
 
-![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen)
-![Ruby](https://img.shields.io/badge/ruby-3.2.2-red)
-![Architecture](https://img.shields.io/badge/architecture-clean%20layered-blue)
-![Docker](https://img.shields.io/badge/docker-containerized-blue?logo=docker)
-…- Domain-Driven Design
-
-- Comprehensive test coverage (108 tests)
-- Code review-driven improvements (8 CodeRabbit fixes)
+[![Tests](https://img.shields.io/badge/tests-164%20passing-brightgreen)](https://github.com/yourusername/commercial-juicer-ruby/actions)
+[![Ruby](https://img.shields.io/badge/ruby-3.2.2-red)](https://www.ruby-lang.org/)
+[![Architecture](https://img.shields.io/badge/architecture-clean%20layered-blue)](#-architecture)
+[![Docker](https://img.shields.io/badge/docker-containerized-blue?logo=docker)](#-docker-support)
+[![Prometheus](https://img.shields.io/badge/observability-prometheus-orange?logo=prometheus)](#-prometheus-metrics)
+[![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
 ---
 
-## Architecture
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [🎮 Usage](#-usage)
+- [🧪 Testing](#-testing)
+- [🐳 Docker Support](#-docker-support)
+- [📊 Prometheus Metrics](#-prometheus-metrics)
+- [🔧 Development](#-development)
+- [🤝 Contributing](#-contributing)
+- [📚 Design Decisions](#-design-decisions)
+- [📄 License](#license)
+- [🙏 Acknowledgments](#-acknowledgments)
+
+---
+
+## ✨ Features
+
+### 🎯 Core Functionality
+
+| Feature                | Description                                                    |
+| ---------------------- | -------------------------------------------------------------- |
+| 🍊 Fruit Processing    | Feed fruits with configurable type, size, ripeness, and weight |
+| 🧃 Juice Extraction    | Realistic yield formulas based on fruit properties             |
+| 🗑️ Waste Tracking      | Track peels, pulp, and seeds with fruit-specific ratios        |
+| 🛡️ Overflow Protection | Pre-validate tank/bin capacity before state mutations          |
+| 🔁 Filter Management   | Clog detection, cleaning cycles, and replacement scheduling    |
+| ⚙️ Wear Simulation     | Press/filter degradation with efficiency tracking              |
+| 🧹 Maintenance         | Scheduled maintenance with state recovery                      |
+| 📈 Metrics             | Production metrics, efficiency calculations, error tracking    |
+
+### 🔐 Safety & Reliability
+
+- ✅ **Pre-validation**: All conditions checked BEFORE state mutations
+- ✅ **Exception Safety**: `ensure` blocks guarantee state cleanup
+- ✅ **Input Validation**: Domain entities enforce invariants at boundaries
+- ✅ **Unit Consistency**: Clear documentation of grams vs milliliters
+- ✅ **State Machine**: Explicit states with validated transitions
+
+### 🌟 Advanced Features
+
+- 🍊 **Variable Efficiency**: Orange (50%), Lemon (40%), Grapefruit (45%) juice yields
+- 🌡️ **Fruit Properties**: Unique density, peel ratio, and juice factors per type
+- 🔧 **Wear Tracking**: 0.1% wear per press, 0.2% per filter operation
+- 📉 **Efficiency Degradation**: Press (100%→50%), Filter (100%→80%) minimums
+- 🔔 **Maintenance Alerts**: Threshold-based maintenance scheduling
+- 📊 **Prometheus Metrics**: 9 production-ready metrics for monitoring
+
+---
+
+## 🏗️ Architecture
+
+### Clean Layered Architecture
 
 `````text
-
-┌──────────────────────────┐
-│ Interface Layer │ CLI / API / Web UI
-│ (bin/juicer_cli.rb) │
-└──────────────▲───────────┘
-│
-┌──────────────┴───────────┐
-│ Application Layer │ Use Cases & Orchestration
-│ (lib/application/) │
-└──────────────▲───────────┘
-│
-┌──────────────┴───────────┐
-│ Domain Layer │ Core Business Logic
-│ (lib/domain/) │ (Pure Ruby, No Dependencies)
-└──────────────▲───────────┘
-│
-┌──────────────┴───────────┐
-│ Infrastructure Layer │ Logging, Storage, Sensors
-│ (lib/infrastructure/) │
-└──────────────────────────┘
+┌─────────────────────────────────┐
+│     Interface Layer              │
+│  • CLI (bin/juicer_cli.rb)      │
+│  • REST API (lib/api/)          │
+│  • Prometheus /metrics endpoint │
+└──────────────▲──────────────────┘
+               │
+┌──────────────┴──────────────────┐
+│     Application Layer            │
+│  • Use Cases (start, stop,      │
+│    clean, feed, metrics)        │
+│  • Orchestration logic          │
+└──────────────▲──────────────────┘
+               │
+┌──────────────┴──────────────────┐
+│     Domain Layer (Pure Ruby)    │
+│  • Entities: Fruit, PressUnit,  │
+│    FilterUnit, JuiceTank, etc.  │
+│  • Value Objects: FruitSize,    │
+│    FruitType, RipenessLevel     │
+│  • JuicerMachine orchestrator   │
+│  • ZERO external dependencies   │
+└──────────────▲──────────────────┘
+               │
+┌──────────────┴──────────────────┐
+│   Infrastructure Layer           │
+│  • Prometheus metrics registry  │
+│  • Logging, storage (optional)  │
+│  • External integrations        │
+└─────────────────────────────────┘
 
 ### Clean Layered Architecture
 
@@ -281,6 +342,38 @@ commercial-juicer-ruby/
 Following YAGNI principle. Current complexity matches current scale.
 Architecture is designed to evolve without breaking changes.
 
+$ ruby bin/juicer_cli.rb
+
+# 🍊 Commercial Citrus Juicer Simulator
+
+State: idle | Juice: 0 ml | Waste: 0 g
+
+Commands:
+start - Start the juicer
+stop - Stop the juicer
+feed <params> - Feed a fruit (e.g., feed type=orange size=medium weight=150)
+clean - Clean the machine
+status - Show current status
+metrics - Show production metrics
+help - Show this help
+exit - Exit the simulator
+
+> start
+> ✅ Juicer started successfully
+
+> feed type=orange size=medium ripeness=ripe weight=150
+> ✅ Fruit processed: 28.82 ml juice, 55.5 g waste
+
+> metrics
+> 📊 Production Metrics:
+> Fruits processed: 1
+> Total juice: 28.82 ml
+> Total waste: 55.5 g
+> Efficiency: 57.6%
+
+> exit
+> 👋 Goodbye!
+
 ## 🐳 Docker Support
 
 This project is fully containerized for easy deployment and testing.
@@ -310,3 +403,89 @@ docker-compose run --rm juicer bundle exec rspec
 …# Stop API server
 docker-compose down
 ```
+
+## 📊 Prometheus Metrics
+
+This project exposes Prometheus-compatible metrics for monitoring and alerting.
+
+### Metrics Endpoint
+
+### Available Metrics
+
+# Scrape metrics
+
+curl http://localhost:4567/metrics
+
+# Example output:
+
+# HELP juicer_fruits_processed_total Total number of fruits processed
+
+# TYPE juicer_fruits_processed_total counter
+
+juicer_fruits_processed_total{fruit_type="orange"} 1
+
+# HELP juicer_juice_produced_ml_total Total juice produced in milliliters
+
+# TYPE juicer_juice_produced_ml_total counter
+
+juicer_juice_produced_ml_total{fruit_type="orange"} 28.82
+
+# HELP juicer_request_duration_seconds HTTP request duration in seconds
+
+# TYPE juicer_request_duration_seconds histogram
+
+juicer_request_duration_seconds_bucket{le="0.01"} 1
+juicer_request_duration_seconds_bucket{le="0.05"} 1
+...
+
+### Example Query (PromQL)
+
+```promql
+# Fruits processed per minute
+rate(juicer_fruits_processed_total[1m])
+
+# Error rate
+rate(juicer_errors_total[5m])
+
+# Average request duration
+rate(juicer_request_duration_seconds_sum[5m]) / rate(juicer_request_duration_seconds_count[5m])
+```
+
+# All tests (164 examples)
+
+bundle exec rspec
+
+# Specific test files
+
+bundle exec rspec spec/domain/entities/fruit_spec.rb
+bundle exec rspec spec/api/metrics_spec.rb
+
+# With documentation format
+
+bundle exec rspec --format documentation
+
+# With coverage report
+
+bundle exec rspec --format progress --require simplecov
+
+MIT License
+
+Copyright (c) 2025 Tendai Nyandoro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
