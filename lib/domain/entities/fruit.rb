@@ -9,16 +9,10 @@ module Domain
     class Fruit
       attr_reader :id, :type, :size, :ripeness, :weight, :fruit_type
 
-      # Default values for backward compatibility
-      DEFAULT_JUICE_FACTOR = 0.5
-      DEFAULT_DENSITY = 1.0
-      DEFAULT_PEEL_RATIO = 0.3
-
       def initialize(type: :orange, size: :medium, ripeness: :ripe, weight: nil, fruit_type: nil)
         @id = SecureRandom.uuid
         @type = type.to_sym
         
-        # Support both old symbol-based and new FruitType-based initialization
         if fruit_type.is_a?(ValueObjects::FruitType)
           @fruit_type = fruit_type
         else
@@ -30,22 +24,16 @@ module Domain
         @weight = weight || default_weight_for_size
       end
 
+      # ✅ LINE 28 - NO PARAMETERS (this is the critical fix)
       def potential_juice_volume
-        # Juice calculation: weight * size_factor * ripeness_factor * fruit_type_factor
         juice_grams = @weight * @size.juice_factor * @ripeness.factor * @fruit_type.juice_factor
-        
-        # Convert grams to milliliters using fruit-specific density
         juice_ml = juice_grams / @fruit_type.density
-        
         ValueObjects::JuiceVolume.new(juice_ml)
       end
 
       def potential_waste
-        # Waste = peel + seeds + pulp not extracted
-        # Peel is fruit-type specific, rest is proportional
         peel_grams = @weight * @fruit_type.peel_ratio
-        other_waste_grams = (@weight - peel_grams) * 0.1  # 10% additional waste
-        
+        other_waste_grams = (@weight - peel_grams) * 0.1
         (peel_grams + other_waste_grams).round(2)
       end
 

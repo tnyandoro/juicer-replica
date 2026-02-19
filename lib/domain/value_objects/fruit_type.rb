@@ -30,7 +30,7 @@ module Domain
         @type = type.to_sym
         config = TYPES[@type]
         
-        raise ArgumentError, "Unknown fruit type: #{type}. Valid types: #{valid_types}" unless config
+        raise ArgumentError, "Unknown fruit type: #{type}. Valid types: #{self.class.valid_types.join(', ')}" unless config
         
         @juice_factor = config[:juice_factor]
         @density = config[:density]

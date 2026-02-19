@@ -1,4 +1,3 @@
-# lib/domain/value_objects/fruit_size.rb
 module Domain
   module ValueObjects
     class FruitSize
@@ -18,6 +17,18 @@ module Domain
         
         @weight_range = config[:weight_range]
         @juice_factor = config[:juice_factor]
+      end
+
+      def small?
+        @size == :small
+      end
+
+      def medium?
+        @size == :medium
+      end
+
+      def large?
+        @size == :large
       end
 
       def type
