@@ -4,7 +4,6 @@ require 'rack/cors'
 require_relative '../domain'
 
 class JuicerAPI < Sinatra::Base
-  # Enable CORS
   use Rack::Cors do
     allow do
       origins '*'
@@ -12,22 +11,18 @@ class JuicerAPI < Sinatra::Base
     end
   end
 
-  # Initialize machine
   set :machine, Domain::JuicerMachine.new
   set :bind, '0.0.0.0'
   set :port, 4567
 
-  # Health check
   get '/health' do
     json({ status: 'healthy', timestamp: Time.now.iso8601 })
   end
 
-  # Get machine status
   get '/status' do
     json settings.machine.status
   end
 
-  # Get metrics
   get '/metrics' do
     status = settings.machine.status
     json({
@@ -40,31 +35,26 @@ class JuicerAPI < Sinatra::Base
     })
   end
 
-  # Start machine
   post '/start' do
     result = execute_action(:start)
     json result
   end
 
-  # Stop machine
   post '/stop' do
     result = execute_action(:stop)
     json result
   end
 
-  # Clean machine
   post '/clean' do
     result = execute_action(:clean)
     json result
   end
 
-  # Feed fruit
   post '/feed' do
     begin
       params = JSON.parse(request.body.read)
       machine = settings.machine
 
-      # Check machine state BEFORE creating fruit
       unless machine.running?
         halt 400, json({
           success: false,
@@ -118,7 +108,6 @@ class JuicerAPI < Sinatra::Base
     end
   end
 
-  # Reset machine
   post '/reset' do
     settings.machine.reset_to_idle
     json({ success: true, message: 'Machine reset to idle', state: :idle })

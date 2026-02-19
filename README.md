@@ -5,6 +5,7 @@ A production-grade simulation of a commercial citrus juicer (Zumex Versatile Bas
 ![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen)
 ![Ruby](https://img.shields.io/badge/ruby-3.2.2-red)
 ![Architecture](https://img.shields.io/badge/architecture-clean%20layered-blue)
+![Docker](https://img.shields.io/badge/docker-containerized-blue?logo=docker)
 …- Domain-Driven Design
 
 - Comprehensive test coverage (108 tests)
@@ -279,3 +280,33 @@ commercial-juicer-ruby/
 **Rationale:**
 Following YAGNI principle. Current complexity matches current scale.
 Architecture is designed to evolve without breaking changes.
+
+## 🐳 Docker Support
+
+This project is fully containerized for easy deployment and testing.
+
+### Prerequisites
+
+- Docker 20.10+
+- Docker Compose 2.0+
+
+### Quick Start
+
+```bash
+# Run all tests in Docker
+docker-compose run juicer
+
+# Start API server in Docker
+docker-compose up juicer-api
+
+# Run CLI in Docker
+docker-compose run juicer ruby bin/juicer_cli.rb
+
+# Run specific tests
+docker-compose run juicer bundle exec rspec spec/domain/
+
+docker-compose run --rm juicer bundle exec rspec
+
+…# Stop API server
+docker-compose down
+```

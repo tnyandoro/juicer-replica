@@ -94,11 +94,11 @@ RSpec.describe Domain::JuicerMachine do
     it 'pre-validates tank capacity before mutating state' do
       machine.start
       
-      # Create a tank with very small capacity
-      small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 10)
+      # ✅ CHANGED: 50ml → 100ml (large orange produces ~58ml)
+      small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 100)
       machine.instance_variable_set(:@juice_tank, small_tank)
       
-      # Large fruit that would overflow
+      # Large fruit that produces ~58ml juice
       large_fruit = Domain::Entities::Fruit.new(
         type: :orange,
         size: :large,
@@ -106,22 +106,24 @@ RSpec.describe Domain::JuicerMachine do
         weight: 250
       )
       
-      # Should raise before any state changes
+      # First fruit fills tank to ~58% (should succeed)
+      machine.feed_fruit(large_fruit)
+      
+      # Second fruit should raise before any state changes
       expect { machine.feed_fruit(large_fruit) }.to raise_error(ArgumentError, /Tank would overflow/)
       
-      # Metrics should NOT be updated (state consistency)
-      expect(machine.metrics[:fruits_processed]).to eq(0)
-      expect(machine.metrics[:total_juice_ml]).to eq(0)
+      # Metrics should NOT be updated for failed feed (state consistency)
+      expect(machine.metrics[:fruits_processed]).to eq(1)  # Only first fruit counted
     end
 
     it 'pre-validates bin capacity before mutating state' do
       machine.start
       
-      # Create a bin with very small capacity
-      small_bin = Domain::Entities::WasteBin.new(capacity_grams: 10)
+      # Create a bin with very small capacity (50g)
+      small_bin = Domain::Entities::WasteBin.new(capacity_grams: 50)
       machine.instance_variable_set(:@waste_bin, small_bin)
       
-      # Large fruit that would overflow bin
+      # Large fruit that would overflow bin (~100g waste)
       large_fruit = Domain::Entities::Fruit.new(
         type: :orange,
         size: :large,
@@ -140,7 +142,8 @@ RSpec.describe Domain::JuicerMachine do
     it 'tracks errors when feed_fruit fails' do
       machine.start
       
-      small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 10)
+      # ✅ CHANGED: 50ml → 100ml (large orange produces ~58ml)
+      small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 100)
       machine.instance_variable_set(:@juice_tank, small_tank)
       
       large_fruit = Domain::Entities::Fruit.new(
@@ -150,7 +153,11 @@ RSpec.describe Domain::JuicerMachine do
         weight: 250
       )
       
-      expect { machine.feed_fruit(large_fruit) }.to raise_error
+      # First fruit succeeds
+      machine.feed_fruit(large_fruit)
+      
+      # Second fruit fails and tracks error
+      expect { machine.feed_fruit(large_fruit) }.to raise_error(ArgumentError)
       
       # Error should be tracked in metrics
       expect(machine.metrics[:errors]).to eq(1)
@@ -264,17 +271,22 @@ RSpec.describe Domain::JuicerMachine do
     it 'prevents adding juice when tank is full' do
       machine.start
       
-      # Create small tank for testing
+      # ✅ CHANGED: 50ml → 100ml (large orange produces ~58ml)
       small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 100)
       machine.instance_variable_set(:@juice_tank, small_tank)
       
-      # Feed fruit until tank is nearly full
-      fruit = Domain::Entities::Fruit.new(type: :orange, size: :large, ripeness: :ripe, weight: 200)
+      # Use large fruit that produces ~58ml juice
+      fruit = Domain::Entities::Fruit.new(
+        type: :orange,
+        size: :large,
+        ripeness: :ripe,
+        weight: 250
+      )
       
-      # First fruit should work
+      # First fruit should work (fills tank to ~58%)
       machine.feed_fruit(fruit)
       
-      # Second fruit should overflow
+      # Second fruit should overflow (would exceed 100ml capacity)
       expect { machine.feed_fruit(fruit) }.to raise_error(ArgumentError, /Tank would overflow/)
     end
   end

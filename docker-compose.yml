@@ -1,0 +1,25 @@
+services:
+  juicer:
+    build: .
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    ports:
+      - "4567:4567"
+    environment:
+      - RACK_ENV=development
+    command: bundle exec rspec
+
+  juicer-api:
+    build: .
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    ports:
+      - "4567:4567"
+    environment:
+      - RACK_ENV=production
+    command: bundle exec ruby lib/api/juicer_api.rb -o 0.0.0.0
+
+volumes:
+  bundle_cache:

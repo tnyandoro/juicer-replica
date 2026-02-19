@@ -24,7 +24,7 @@ require_relative 'application/use_cases/get_metrics'
 require_relative 'application/use_cases/get_status'
 
 module Application
-  # List available use cases (for documentation/discovery)
+
   def self.available_use_cases
     [:start_juicing, :stop_juicing, :clean_machine, :feed_fruit, :get_metrics, :get_status]
   end

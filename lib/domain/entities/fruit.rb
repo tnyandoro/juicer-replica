@@ -1,53 +1,49 @@
 require 'securerandom'
 require_relative '../value_objects/fruit_size'
 require_relative '../value_objects/ripeness_level'
+require_relative '../value_objects/fruit_type'
 require_relative '../value_objects/juice_volume'
 
 module Domain
   module Entities
     class Fruit
-      # Juice density approximation (g/ml)
-      # Citrus juice density: ~1.04 g/ml (slightly denser than water)
-      # For simulation simplicity, we use 1.0 g/ml approximation
-      JUICE_DENSITY = 1.0 # g/ml
+      attr_reader :id, :type, :size, :ripeness, :weight, :fruit_type
 
-      attr_reader :id, :type, :size, :ripeness, :weight
-
-      def initialize(type:, size:, ripeness:, weight: nil)
+      def initialize(type: :orange, size: :medium, ripeness: :ripe, weight: nil, fruit_type: nil)
         @id = SecureRandom.uuid
-        @type = type # :orange, :lemon, :grapefruit
+        @type = type.to_sym
         
-        # Convert to value objects FIRST before using their methods
+        if fruit_type.is_a?(ValueObjects::FruitType)
+          @fruit_type = fruit_type
+        else
+          @fruit_type = ValueObjects::FruitType.new(@type)
+        end
+        
         @size = size.is_a?(ValueObjects::FruitSize) ? size : ValueObjects::FruitSize.new(size)
         @ripeness = ripeness.is_a?(ValueObjects::RipenessLevel) ? ripeness : ValueObjects::RipenessLevel.new(ripeness)
-        
-        # Now we can safely access weight_range
-        @weight = weight || rand(@size.weight_range)
+        @weight = weight || default_weight_for_size
       end
 
-      def potential_juice_volume(efficiency_factor = 0.9)
-        # Formula: weight * ripeness_factor * juice_factor * efficiency
-        # Result is in milliliters (ml)
-        juice_ml = weight * ripeness.factor * size.juice_factor * efficiency_factor
+      # ✅ LINE 28 - NO PARAMETERS (this is the critical fix)
+      def potential_juice_volume
+        juice_grams = @weight * @size.juice_factor * @ripeness.factor * @fruit_type.juice_factor
+        juice_ml = juice_grams / @fruit_type.density
         ValueObjects::JuiceVolume.new(juice_ml)
       end
 
-      def potential_waste(efficiency_factor = 0.9)
-        # Calculate juice volume first
-        juice = potential_juice_volume(efficiency_factor)
-        
-        # Convert juice volume to weight using density
-        # NOTE: This assumes juice density ≈ 1.0 g/ml (water-like)
-        # Actual citrus juice density is ~1.04-1.05 g/ml
-        # For simulation purposes, this approximation is acceptable
-        juice_weight = juice.milliliters * JUICE_DENSITY
-        
-        # Waste = original fruit weight - juice weight (both in grams)
-        (weight - juice_weight).round(2)
+      def potential_waste
+        peel_grams = @weight * @fruit_type.peel_ratio
+        other_waste_grams = (@weight - peel_grams) * 0.1
+        (peel_grams + other_waste_grams).round(2)
       end
 
-      def ==(other)
-        other.is_a?(Fruit) && id == other.id
+      def default_weight_for_size
+        case @size.type
+        when :small then rand(80..120)
+        when :medium then rand(120..180)
+        when :large then rand(180..250)
+        else 150
+        end
       end
     end
   end

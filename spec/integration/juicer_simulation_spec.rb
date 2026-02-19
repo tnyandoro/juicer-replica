@@ -46,18 +46,24 @@ RSpec.describe 'Juicer Simulation' do
     it 'prevents adding juice when tank is full' do
       machine.start
       
-      # Create small tank for testing
+      # Create small tank for testing (100ml capacity)
+      # Each large orange produces ~58ml juice, so 2nd fruit will overflow
       small_tank = Domain::Entities::JuiceTank.new(capacity_ml: 100)
       machine.instance_variable_set(:@juice_tank, small_tank)
       
-      # Feed fruit until tank is nearly full
-      fruit = Domain::Entities::Fruit.new(type: :orange, size: :large, ripeness: :ripe, weight: 200)
+      # Use large fruit that produces ~58ml juice
+      fruit = Domain::Entities::Fruit.new(
+        type: :orange,
+        size: :large,
+        ripeness: :ripe,
+        weight: 250
+      )
       
-      # First fruit should work
+      # First fruit should work (fills tank to ~58%)
       machine.feed_fruit(fruit)
       
-      # Second fruit might overflow depending on juice volume
-      expect { machine.feed_fruit(fruit) }.to raise_error(ArgumentError)
+      # Second fruit should overflow (would exceed 100ml capacity)
+      expect { machine.feed_fruit(fruit) }.to raise_error(ArgumentError, /Tank would overflow/)
     end
   end
 
