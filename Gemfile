@@ -18,3 +18,4 @@ gem 'rack-cors', '~> 2.0'
 
 # Optional: Event logging
 gem 'semantic_logger', '~> 4.15'
+gem 'prometheus-client', '~> 4.2'

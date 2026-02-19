@@ -17,6 +17,8 @@ GEM
       ast (~> 2.4.1)
       racc
     prism (1.9.0)
+    prometheus-client (4.2.5)
+      base64
     puma (6.6.1)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -82,6 +84,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  prometheus-client (~> 4.2)
   puma (~> 6.0)
   rack-cors (~> 2.0)
   rack-test (~> 2.1)
