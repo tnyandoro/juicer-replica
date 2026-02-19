@@ -49,28 +49,28 @@ A production-grade simulation of a commercial citrus juicer (Zumex Versatile Bas
 
 ---
 
-## ✨ Features
+## :star Features
 
 ### Core Features
 
-- ✅ Fruit feeding with size, type, and ripeness parameters
-- ✅ Juice extraction with realistic yield formulas
-- ✅ Waste tracking (peels, pulp, seeds)
-- ✅ Tank overflow protection
-- ✅ Filter clog detection and cleaning cycles
-- ✅ Error state management and recovery
-- ✅ Production metrics and efficiency tracking
+-  Fruit feeding with size, type, and ripeness parameters
+-  Juice extraction with realistic yield formulas
+-  Waste tracking (peels, pulp, seeds)
+-  Tank overflow protection
+-  Filter clog detection and cleaning cycles
+-  Error state management and recovery
+-  Production metrics and efficiency tracking
 
 ### Safety Features
 
-- ✅ Pre-validation before state mutations (no partial updates)
-- ✅ Exception-safe state management (ensure blocks)
-- ✅ Input validation (positive values, valid states)
-- ✅ Unit consistency (grams vs milliliters documented)
+-  Pre-validation before state mutations (no partial updates)
+-  Exception-safe state management (ensure blocks)
+-  Input validation (positive values, valid states)
+-  Unit consistency (grams vs milliliters documented)
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ````bash
 # Clone the repository
@@ -255,3 +255,27 @@ commercial-juicer-ruby/
 ├── README.md
 └── .rspec
 ```
+
+### Current Approach: Base Class + Manual Requires
+
+**Pros:**
+
+- Explicit dependencies (easy to trace)
+- Consistent interface (success/failure helpers)
+- Easy to debug (no magic)
+- Fast startup (no file system scanning)
+
+**Cons:**
+
+- Manual requires (must update when adding use cases)
+- No auto-discovery
+
+**When to Evolve:**
+
+- 20+ use cases → Migrate to `autoload`
+- 50+ use cases → Add registry pattern
+- 100+ use cases → Split into separate gems
+
+**Rationale:**
+Following YAGNI principle. Current complexity matches current scale.
+Architecture is designed to evolve without breaking changes.

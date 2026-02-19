@@ -1,4 +1,3 @@
-# lib/domain/juicer_machine.rb
 require 'securerandom'
 require_relative 'entities/fruit'
 require_relative 'entities/juice_tank'
@@ -49,29 +48,21 @@ module Domain
       raise "Press unit error" if @press_unit.error?
       raise "Filter clogged" if @filter_unit.clogged?
 
-      # Pre-compute results to validate before mutating state
       result = @press_unit.press(fruit)
-      
-      # FIX: Capture filtered juice result (not discarded)
       filtered_juice = @filter_unit.filter(result[:juice])
 
-      # Pre-validate capacity BEFORE adding anything
       raise ArgumentError, "Tank would overflow" if @juice_tank.would_overflow?(filtered_juice)
       raise ArgumentError, "Bin would overflow" if @waste_bin.would_overflow?(result[:waste])
 
-      # Now safe to mutate state - all validations passed
-      # FIX: Use filtered_juice instead of original result[:juice]
       @juice_tank.add_juice(filtered_juice)
       @waste_bin.add_waste(result[:waste])
 
       @metrics[:fruits_processed] += 1
-      # FIX: Track filtered juice volume in metrics
       @metrics[:total_juice_ml] += filtered_juice.milliliters
       @metrics[:total_waste_grams] += result[:waste]
 
       result
     rescue => e
-      # Track errors but don't swallow them
       @metrics[:errors] += 1
       raise e
     end
