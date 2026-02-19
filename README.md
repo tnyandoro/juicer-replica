@@ -310,3 +310,33 @@ docker-compose run --rm juicer bundle exec rspec
 …# Stop API server
 docker-compose down
 ```
+
+## 📊 Prometheus Metrics
+
+This project exposes Prometheus-compatible metrics for monitoring and alerting.
+
+### Metrics Endpoint
+
+### Available Metrics
+
+| Metric                              | Type      | Description               |
+| ----------------------------------- | --------- | ------------------------- |
+| `juicer_fruits_processed_total`     | Counter   | Total fruits processed    |
+| `juicer_juice_produced_ml_total`    | Counter   | Total juice produced (ml) |
+| `juicer_waste_produced_grams_total` | Counter   | Total waste produced (g)  |
+| `juicer_errors_total`               | Counter   | Total errors encountered  |
+| `juicer_machine_state`              | Gauge     | Current machine state     |
+| `juicer_request_duration_seconds`   | Histogram | HTTP request duration     |
+
+### Example Query (PromQL)
+
+```promql
+# Fruits processed per minute
+rate(juicer_fruits_processed_total[1m])
+
+# Error rate
+rate(juicer_errors_total[5m])
+
+# Average request duration
+rate(juicer_request_duration_seconds_sum[5m]) / rate(juicer_request_duration_seconds_count[5m])
+```
