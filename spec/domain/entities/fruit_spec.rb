@@ -86,4 +86,63 @@ RSpec.describe Domain::Entities::Fruit do
     expect(total).to be_within(0.5).of(fruit.weight)
     end
   end
+
+  describe 'Variable efficiency by fruit type' do
+    it 'calculates different juice volumes for different fruit types' do
+      # Same weight, size, ripeness - different fruit types
+      orange = Domain::Entities::Fruit.new(type: :orange, size: :medium, ripeness: :ripe, weight: 150)
+      lemon = Domain::Entities::Fruit.new(type: :lemon, size: :medium, ripeness: :ripe, weight: 150)
+      grapefruit = Domain::Entities::Fruit.new(type: :grapefruit, size: :medium, ripeness: :ripe, weight: 150)
+      
+      orange_juice = orange.potential_juice_volume.milliliters
+      lemon_juice = lemon.potential_juice_volume.milliliters
+      grapefruit_juice = grapefruit.potential_juice_volume.milliliters
+      
+      # Orange should be juiciest (0.50 factor)
+      expect(orange_juice).to be > lemon_juice
+      # Grapefruit should be in middle (0.45 factor)
+      expect(grapefruit_juice).to be > lemon_juice
+      expect(grapefruit_juice).to be < orange_juice
+    end
+
+    it 'calculates different waste amounts for different fruit types' do
+      orange = Domain::Entities::Fruit.new(type: :orange, weight: 150)
+      lemon = Domain::Entities::Fruit.new(type: :lemon, weight: 150)
+      grapefruit = Domain::Entities::Fruit.new(type: :grapefruit, weight: 150)
+      
+      # Grapefruit has highest peel_ratio (0.40), so most waste
+      expect(grapefruit.potential_waste).to be > orange.potential_waste
+      expect(lemon.potential_waste).to be > orange.potential_waste
+    end
+
+    it 'uses fruit-specific density for ml conversion' do
+      # Same juice grams, different densities = different ml
+      orange = Domain::Entities::Fruit.new(type: :orange, weight: 150)
+      grapefruit = Domain::Entities::Fruit.new(type: :grapefruit, weight: 150)
+      
+      # Grapefruit has higher density (1.05 vs 1.04), so slightly less ml for same grams
+      orange_juice = orange.potential_juice_volume.milliliters
+      grapefruit_juice = grapefruit.potential_juice_volume.milliliters
+      
+      # The difference is small but measurable
+      expect((orange_juice - grapefruit_juice).abs).to be_within(1.0).of(0.5)
+    end
+
+    it 'maintains backward compatibility with symbol-based initialization' do
+      # Old code using just symbols should still work
+      fruit = Domain::Entities::Fruit.new(type: :orange, size: :medium, ripeness: :ripe)
+      
+      expect(fruit.fruit_type).to be_a(Domain::ValueObjects::FruitType)
+      expect(fruit.fruit_type.type).to eq(:orange)
+      expect(fruit.potential_juice_volume).to be_a(Domain::ValueObjects::JuiceVolume)
+    end
+
+    it 'accepts FruitType object for explicit control' do
+      custom_type = Domain::ValueObjects::FruitType.new(:lemon)
+      fruit = Domain::Entities::Fruit.new(fruit_type: custom_type, weight: 150)
+      
+      expect(fruit.fruit_type).to eq(custom_type)
+      expect(fruit.fruit_type.juice_factor).to eq(0.40)
+    end
+  end
 end
