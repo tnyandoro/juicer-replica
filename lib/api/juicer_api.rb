@@ -3,20 +3,20 @@ require 'sinatra/json'
 require 'rack/cors'
 require_relative '../domain'
 
-# Enable CORS
-use Rack::Cors do
-  allow do
-    origins '*'
-    resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
-  end
-end
-
-# Initialize machine
-set :machine, Domain::JuicerMachine.new
-set :bind, '0.0.0.0'
-set :port, 4567
-
 class JuicerAPI < Sinatra::Base
+  # Enable CORS
+  use Rack::Cors do
+    allow do
+      origins '*'
+      resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
+    end
+  end
+
+  # Initialize machine
+  set :machine, Domain::JuicerMachine.new
+  set :bind, '0.0.0.0'
+  set :port, 4567
+
   # Health check
   get '/health' do
     json({ status: 'healthy', timestamp: Time.now.iso8601 })
@@ -62,17 +62,28 @@ class JuicerAPI < Sinatra::Base
   post '/feed' do
     begin
       params = JSON.parse(request.body.read)
-      
       machine = settings.machine
+
+      # Check machine state BEFORE creating fruit
+      unless machine.running?
+        halt 400, json({
+          success: false,
+          message: 'Machine not running',
+          juice: '0 ml',
+          waste: '0g',
+          metrics: machine.metrics
+        })
+      end
+
       fruit = Domain::Entities::Fruit.new(
         type: params['type']&.to_sym || :orange,
         size: params['size']&.to_sym || :medium,
         ripeness: params['ripeness']&.to_sym || :ripe,
         weight: params['weight']&.to_i
       )
-      
+
       result = machine.feed_fruit(fruit)
-      
+
       json({
         success: true,
         message: 'Fruit processed successfully',
@@ -80,14 +91,30 @@ class JuicerAPI < Sinatra::Base
         waste: "#{result[:waste]}g",
         metrics: machine.metrics
       })
+    rescue JSON::ParserError
+      halt 400, json({
+        success: false,
+        message: 'Invalid JSON',
+        juice: '0 ml',
+        waste: '0g',
+        metrics: settings.machine.metrics
+      })
+    rescue ArgumentError => e
+      halt 400, json({
+        success: false,
+        message: e.message,
+        juice: '0 ml',
+        waste: '0g',
+        metrics: settings.machine.metrics
+      })
     rescue => e
-      json({
+      halt 500, json({
         success: false,
         message: "Failed to process fruit: #{e.message}",
         juice: '0 ml',
         waste: '0g',
         metrics: settings.machine.metrics
-      }, 400)
+      })
     end
   end
 
@@ -101,7 +128,7 @@ class JuicerAPI < Sinatra::Base
 
   def execute_action(action)
     machine = settings.machine
-    
+
     case action
     when :start
       machine.start
@@ -125,7 +152,6 @@ class JuicerAPI < Sinatra::Base
   end
 end
 
-# Run if executed directly
 if __FILE__ == $PROGRAM_NAME
   JuicerAPI.run!
 end

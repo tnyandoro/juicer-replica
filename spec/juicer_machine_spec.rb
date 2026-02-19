@@ -1,4 +1,3 @@
-# spec/domain/juicer_machine_spec.rb
 require 'spec_helper'
 require 'domain/juicer_machine'
 require 'domain/entities/fruit'
